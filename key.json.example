@@ -1,0 +1,16 @@
+{
+    "google": {
+        "api_key": "<YOUR API KEY>"
+    },
+    "mistral": {
+        "api_key": "<YOUR API KEY>"
+    },
+    "generic_openai_compatible": {
+        "api_key": "<YOUR API KEY>",
+        "base_url": "https://api.groq.com/openai/v1"
+    },
+    "azure": {
+        "api_key": "<YOUR API KEY>",
+        "base_url": "https://<YOUR RESOURCE NAME>.cognitiveservices.azure.com/"
+    }
+}
