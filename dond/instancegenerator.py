@@ -25,9 +25,6 @@ n_points = 10           # Number of value points per player.
 
 logger = logging.getLogger(__name__)
 
-# Seed for reproducibility
-random.seed(3141592)
-
 
 class DealOrNoDealGameInstanceGenerator(GameInstanceGenerator):
     '''
@@ -122,8 +119,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Generate Deal or No Deal game instances.')
     _ = parser.parse_args()
-    for mode in modes:
-        for lang in languages:
+    for lang in languages:
+        # Seed for reproducibility. We set it here so that all languages get the
+        # same instances, except for the language of course.
+        random.seed(3141592)
+        for mode in modes:
             DealOrNoDealGameInstanceGenerator(
                 mode=mode, language=lang
             ).generate(filename=f'instances_{mode}_{lang}.json')
