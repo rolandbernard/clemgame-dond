@@ -52,6 +52,7 @@ class DealOrNoDealGameInstanceGenerator(GameInstanceGenerator):
         experiment['max_turns'] = n_messages
         experiment['mode'] = self.mode
         experiment['language'] = self.language
+        # Just load the template. Will be filled in by the game master.
         experiment['initial_prompt'] = self.load_template(
             f'resources/{self.language}/initial_{self.mode}'
         )
@@ -105,13 +106,13 @@ class DealOrNoDealGameInstanceGenerator(GameInstanceGenerator):
         * At least one item is values by both players.
         '''
         if sum(count * value for count, value in zip(item_counts, values_a)) != n_points:
-            return False
+            return False  # Values for player A don't add up to `n_points`.
         if sum(count * value for count, value in zip(item_counts, values_b)) != n_points:
-            return False
+            return False  # Values for player B don't add up to `n_points`.
         if any(val_a == 0 and val_b == 0 for val_a, val_b in zip(values_a, values_b)):
-            return False
+            return False  # There is some items not valued by any player.
         if all(val_a == 0 or val_b == 0 for val_a, val_b in zip(values_a, values_b)):
-            return False
+            return False  # There is no item valued by both players.
         return True
 
 

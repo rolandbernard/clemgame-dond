@@ -8,13 +8,13 @@
                     "item_types": [
                         "anello",
                         "tela",
-                        "chiave",
+                        "rivetto",
                         "conchiglia"
                     ],
                     "item_types_plural": [
                         "anelli",
                         "tele",
-                        "chiavi",
+                        "rivetti",
                         "conchiglie"
                     ],
                     "item_counts": [
@@ -39,17 +39,17 @@
                 {
                     "game_id": 1,
                     "item_types": [
-                        "chiave",
+                        "rivetto",
                         "gomma",
                         "bacca",
-                        "dado",
+                        "ingranaggio",
                         "carota"
                     ],
                     "item_types_plural": [
-                        "chiavi",
+                        "rivetti",
                         "gomme",
                         "bacche",
-                        "dadi",
+                        "ingranaggi",
                         "carote"
                     ],
                     "item_counts": [
@@ -110,12 +110,12 @@
                 {
                     "game_id": 3,
                     "item_types": [
-                        "chiave",
+                        "rivetto",
                         "foglia",
                         "spugna"
                     ],
                     "item_types_plural": [
-                        "chiavi",
+                        "rivetti",
                         "foglie",
                         "spugne"
                     ],
@@ -209,7 +209,7 @@
                 {
                     "game_id": 6,
                     "item_types": [
-                        "dadi",
+                        "dado",
                         "moneta",
                         "cucchiaio"
                     ],
@@ -327,12 +327,12 @@
                     "game_id": 10,
                     "item_types": [
                         "ciotola",
-                        "orologio",
+                        "sveglia",
                         "quadro"
                     ],
                     "item_types_plural": [
                         "ciotole",
-                        "orologi",
+                        "sveglie",
                         "quadri"
                     ],
                     "item_counts": [
@@ -417,12 +417,12 @@
                     "item_types": [
                         "campana",
                         "bullone",
-                        "chiave"
+                        "rivetto"
                     ],
                     "item_types_plural": [
                         "campane",
                         "bulloni",
-                        "chiavi"
+                        "rivetti"
                     ],
                     "item_counts": [
                         1,
@@ -722,12 +722,12 @@
                     "item_types": [
                         "cappello",
                         "spazzola",
-                        "chiave"
+                        "rivetto"
                     ],
                     "item_types_plural": [
                         "cappelli",
                         "spazzole",
-                        "chiavi"
+                        "rivetti"
                     ],
                     "item_counts": [
                         2,
@@ -751,13 +751,13 @@
                         "gomma",
                         "pinza",
                         "bullone",
-                        "dado"
+                        "ingranaggio"
                     ],
                     "item_types_plural": [
                         "gomme",
                         "pinze",
                         "bulloni",
-                        "dadi"
+                        "ingranaggi"
                     ],
                     "item_counts": [
                         1,
@@ -782,12 +782,12 @@
                     "game_id": 25,
                     "item_types": [
                         "pinza",
-                        "filo",
+                        "cavo",
                         "limone"
                     ],
                     "item_types_plural": [
                         "pinze",
-                        "fili",
+                        "cavi",
                         "limoni"
                     ],
                     "item_counts": [
@@ -840,7 +840,7 @@
                         "frutta",
                         "guanto",
                         "carta",
-                        "dadi"
+                        "dado"
                     ],
                     "item_types_plural": [
                         "frutti",
@@ -964,7 +964,7 @@
                 {
                     "game_id": 31,
                     "item_types": [
-                        "dadi",
+                        "dado",
                         "corda",
                         "forbici"
                     ],
@@ -1171,13 +1171,13 @@
                     "game_id": 38,
                     "item_types": [
                         "matita",
-                        "dado",
+                        "ingranaggio",
                         "scatola",
                         "busta"
                     ],
                     "item_types_plural": [
                         "matite",
-                        "dadi",
+                        "ingranaggi",
                         "scatole",
                         "buste"
                     ],
@@ -1232,12 +1232,12 @@
                     "game_id": 40,
                     "item_types": [
                         "conchiglia",
-                        "chiave",
+                        "rivetto",
                         "roccia"
                     ],
                     "item_types_plural": [
                         "conchiglie",
-                        "chiavi",
+                        "rivetti",
                         "rocce"
                     ],
                     "item_counts": [
@@ -1376,7 +1376,7 @@
                 {
                     "game_id": 45,
                     "item_types": [
-                        "dadi",
+                        "dado",
                         "bottone",
                         "francobollo"
                     ],
@@ -1517,7 +1517,7 @@
             "max_turns": 5,
             "mode": "comp",
             "language": "it",
-            "initial_prompt": "State giocando a un gioco di negoziazione competitiva in cui dovete accordarvi su come dividere una serie di oggetti tra voi e un altro giocatore.\n\nRegole:\n(a) A Lei e all'altro giocatore viene dato un insieme di oggetti. Ognuno di voi riceve anche una funzione di valore segreta, che rappresenta il valore di ciascun tipo di oggetto.\n(b) Si scambiano messaggi con l'altro giocatore per concordare chi si aggiudica gli oggetti. Potete inviare un massimo di $N$ messaggi ciascuno, oppure terminare in anticipo facendo una proposta segreta in qualsiasi momento.\n(c) A ciascuno di voi viene chiesto di inviare una proposta segreta indicando gli oggetti che desiderate, formattata tra parentesi quadre come segue: \"[Proposta: <numero> <nome oggetto>, <numero> <nome oggetto>, <...>]\".\n(d) Se le vostre proposte sono complementari, cioè ci sono abbastanza oggetti per soddisfare entrambe le proposte, a ciascun giocatore viene assegnato un punteggio basato sulla somma dei valori degli oggetti ricevuti. In caso contrario, entrambi ricevono zero punti.\n(e) L'obiettivo è massimizzare la differenza tra il proprio punteggio e quello dell'altro giocatore.\n\nCominciamo.\n\nL'insieme degli oggetti disponibili è:\n\n$ITEMS$\n\nLa funzione valore segreta è:\n\n$VALUE_FUNCTION$\n\nIMPORTANTE: i vostri messaggi, a meno che non si tratti di una proposta segreta, vengono trasmessi direttamente all'altro giocatore, quindi non includete alcuna risposta alle regole o testo di annuncio del vostro messaggio. Per fare una proposta segreta, utilizzate il formato indicato. Non utilizzare la sintassi delle parentesi quadre quando si comunica all'altro giocatore, altrimenti verrà interpretata come una proposta segreta.\n",
+            "initial_prompt": "State giocando a un gioco di negoziazione competitiva in cui dovete accordarvi su come dividere una serie di oggetti tra voi e un altro giocatore.\n\nRegole:\n(a) A Lei e all'altro giocatore viene dato un insieme di oggetti. Ognuno di voi riceve anche una funzione di valore segreta, che rappresenta il valore di ciascun tipo di oggetto.\n(b) Si scambiano messaggi con l'altro giocatore per concordare chi si aggiudica gli oggetti. Potete inviare un massimo di $N$ messaggi ciascuno, oppure terminare in anticipo facendo una proposta segreta in qualsiasi momento.\n(c) A ciascuno di voi viene chiesto di inviare una proposta segreta indicando gli oggetti che desiderate, formattata tra parentesi quadre come segue: \"[Proposta: <numero> <nome oggetto>, <numero> <nome oggetto>, <...>]\".\n(d) Se le vostre proposte sono complementari, cioè ci sono abbastanza oggetti per soddisfare entrambe le proposte, a ciascun giocatore viene assegnato un punteggio basato sulla somma dei valori degli oggetti ricevuti. In caso contrario, entrambi ricevono zero punti.\n(e) L'obiettivo è massimizzare la differenza tra il proprio punteggio e quello dell'altro giocatore.\n\nCominciamo.\n\nL'insieme degli oggetti disponibili è:\n\n$ITEMS$\n\nLa funzione valore segreta è:\n\n$VALUE_FUNCTION$\n\nIMPORTANTE: i vostri messaggi, a meno che non si tratti di una proposta segreta, vengono trasmessi direttamente all'altro giocatore, quindi non includete alcuna risposta alle regole o testo di annuncio del vostro messaggio. Per fare una proposta segreta, utilizzate il formato indicato. Non utilizzare delle parentesi quadre quando si comunica all'altro giocatore, altrimenti verrà interpretata come una proposta segreta.\n",
             "proposal_early": "L'altro giocatore ha presentato una proposta segreta. Ora tocca a Lei presentare una sua proposta.\n",
             "proposal_timeout": "Il tempo è scaduto. Ora tocca a Lei presentare una proposta segreta.\n"
         }
