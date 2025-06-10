@@ -15,6 +15,8 @@ class AzureOpenAI(openai_api.OpenAI):
 
     def _make_api_client(self):
         creds = backends.load_credentials(NAME)
+        # This has the same interface as the `OpenAI` client, but takes different
+        # arguments, so is not OpenAI compatible.
         return openai.AzureOpenAI(
             api_version='2025-04-01-preview',
             azure_endpoint=creds[NAME]['base_url'],
