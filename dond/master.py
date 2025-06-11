@@ -53,6 +53,18 @@ def find_matching_type(count: int, name: str, types: list[str], types_plural: li
     return None
 
 
+def compute_score(counts: list[int], values: list[int]) -> int:
+    raise NotImplementedError('todo')
+
+
+def maximal_possible_score(counts: list[int], values_a: list[int], values_b: list[int]) -> int:
+    raise NotImplementedError('todo')
+
+
+def pareto_efficiency(counts_a: list[int], counts_b: list[int], values_a: list[int], values_b: list[int]) -> int:
+    raise NotImplementedError('todo')
+
+
 class DealOrNoSealPlayer(Player):
     def __init__(self, model: Model):
         super().__init__(model)
@@ -275,7 +287,46 @@ class DealOrNoDeal(DialogueGameMaster):
         self.log_to_self('error', error.reason)
         self.state.aborted = True
 
+    def compute_turn_score(self):
+        # Just use the episode score. It's not really possible to give a per
+        # turn score in this game.
+        return self.compute_episode_score()
+
+    def compute_episode_score(self):
+        if self.state.success:
+            assert self.state.player_a_proposal is not None
+            assert self.state.player_b_proposal is not None
+            if self.state.mode == 'coop':
+                # For the cooperative game, we score based on the percentage of
+                # the maximal score that was achieved.
+                return (compute_score(
+                    self.state.player_a_proposal, self.state.player_a_values
+                ) + compute_score(
+                    self.state.player_b_proposal, self.state.player_b_values
+                )) / maximal_possible_score(
+                    self.state.item_counts, self.state.player_a_values, self.state.player_b_values
+                )
+            elif self.state.mode == 'semi':
+                # For the semi-competitive version, we use the the pareto efficiency
+                # to evaluate the episode. Ideally, this should be one if no player
+                # can improve without another player getting worse results.
+                return 1 - pareto_efficiency(
+                    self.state.player_a_proposal, self.state.player_b_proposal,
+                    self.state.player_a_values, self.state.player_b_values
+                ) / 10
+            elif self.state.mode == 'coop':
+                # There is not really a way to give an overall score in this case.
+                # We would need to give one score for each player.
+                return 1
+            else:
+                raise ValueError('unknown game mode')
+        return 0
+
     def _on_after_game(self):
         self.log_key(METRIC_ABORTED, int(self.state.aborted))
         self.log_key(METRIC_LOSE, int(self.state.failure))
         self.log_key(METRIC_SUCCESS, int(self.state.success))
+        # Some extra custom values that represent the final result of the game.
+        self.log_key("player_a_proposal", self.state.player_a_proposal)
+        self.log_key("player_b_proposal", self.state.player_b_proposal)
+        self.log_key("episode_score", self.compute_episode_score())

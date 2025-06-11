@@ -29,7 +29,9 @@ models=(
 
 languages=("en" "de" "it")
 
-modes=("coop" "semi" "comp")
+# Not that we skip the competitive scenario, because we can not evaluate it well
+# if both models are the same. We could evaluate models by fixing the opponent.
+modes=("coop" "semi")
 
 echo
 echo "==================================================="
