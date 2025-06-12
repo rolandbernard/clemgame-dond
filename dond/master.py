@@ -8,7 +8,6 @@ from clemcore.backends import Model
 from clemcore.clemgame import GameSpec, GameMaster, GameBenchmark, Player, DialogueGameMaster, GameScorer
 from clemcore.clemgame.master import ParseError, RuleViolationError, GameError
 from clemcore.clemgame.metrics import METRIC_ABORTED, METRIC_SUCCESS, METRIC_LOSE, BENCH_SCORE
-from clemcore.utils import string_utils
 
 from nltk.stem.snowball import SnowballStemmer
 
@@ -61,7 +60,7 @@ def maximal_possible_score(counts: list[int], values_a: list[int], values_b: lis
     raise NotImplementedError('todo')
 
 
-def pareto_efficiency(counts_a: list[int], counts_b: list[int], values_a: list[int], values_b: list[int]) -> int:
+def pareto_improvement(counts: list[int], values_a: list[int], values_b: list[int], counts_a: list[int], counts_b: list[int]) -> int:
     raise NotImplementedError('todo')
 
 
@@ -292,35 +291,86 @@ class DealOrNoDeal(DialogueGameMaster):
         # turn score in this game.
         return self.compute_episode_score()
 
-    def compute_episode_score(self):
+    def compute_sum_of_scores(self) -> int:
+        # Players only get points in the case of success.
         if self.state.success:
             assert self.state.player_a_proposal is not None
             assert self.state.player_b_proposal is not None
-            if self.state.mode == 'coop':
-                # For the cooperative game, we score based on the percentage of
-                # the maximal score that was achieved.
-                return (compute_score(
-                    self.state.player_a_proposal, self.state.player_a_values
-                ) + compute_score(
-                    self.state.player_b_proposal, self.state.player_b_values
-                )) / maximal_possible_score(
-                    self.state.item_counts, self.state.player_a_values, self.state.player_b_values
-                )
-            elif self.state.mode == 'semi':
-                # For the semi-competitive version, we use the the pareto efficiency
-                # to evaluate the episode. Ideally, this should be one if no player
-                # can improve without another player getting worse results.
-                return 1 - pareto_efficiency(
-                    self.state.player_a_proposal, self.state.player_b_proposal,
-                    self.state.player_a_values, self.state.player_b_values
-                ) / 10
-            elif self.state.mode == 'coop':
-                # There is not really a way to give an overall score in this case.
-                # We would need to give one score for each player.
-                return 1
-            else:
-                raise ValueError('unknown game mode')
+            return compute_score(
+                self.state.player_a_proposal, self.state.player_a_values
+            ) + compute_score(
+                self.state.player_b_proposal, self.state.player_b_values
+            )
         return 0
+
+    def compute_maximal_sum_of_scores(self) -> int:
+        # The maximum possible score does not depend on the players actions.
+        return maximal_possible_score(
+            self.state.item_counts, self.state.player_a_values, self.state.player_b_values
+        )
+
+    def compute_maximal_player_score(self) -> int:
+        # This is the maximum score a single player can get. Our instance generator
+        # ensures this is the same for both player, but here we make sure it works
+        # even with biased instances.
+        return max(
+            compute_score(self.state.item_counts, self.state.player_a_values),
+            compute_score(self.state.item_counts, self.state.player_b_values),
+        )
+
+    def compute_maximal_pareto_improvement(self) -> int:
+        if self.state.mode == 'coop':
+            # This is achieved when the no one gets any points.
+            return self.compute_maximal_sum_of_scores()
+        elif self.state.mode == 'semi':
+            # This is achieved when the no one gets any points.
+            return self.compute_maximal_player_score()
+        elif self.state.mode == 'comp':
+            # It will always be zero.
+            return 0
+        else:
+            raise ValueError('unknown game mode')
+
+    def compute_pareto_improvement(self) -> int:
+        if self.state.mode == 'coop':
+            # In the cooperative setting both players get the same score, so the
+            # optimal one is just the maximum achievable.
+            return self.compute_maximal_sum_of_scores() - self.compute_sum_of_scores()
+        elif self.state.mode == 'semi':
+            if self.state.success:
+                # On success compute based on proposals.
+                assert self.state.player_a_proposal is not None
+                assert self.state.player_b_proposal is not None
+                return pareto_improvement(
+                    self.state.item_counts,
+                    self.state.player_a_values, self.state.player_b_values,
+                    self.state.player_a_proposal, self.state.player_b_proposal,
+                )
+            else:
+                # On failure, compute how much better one player could have done.
+                # Since all players get zero here, we can give all items to one
+                # player and see how much it could improve.
+                return self.compute_maximal_player_score()
+        elif self.state.mode == 'comp':
+            # In a competitive zero-sum setting, all outcomes are pareto
+            # optimal, as increasing the score of one player always leads to
+            # worse result for the others.
+            return 0
+        else:
+            raise ValueError('unknown game mode')
+
+    def compute_pareto_optimality(self) -> bool:
+        # If no pareto improvement is possible, the result was optimal.
+        return self.compute_pareto_improvement() == 0
+
+    def compute_episode_score(self):
+        if self.state.mode == 'coop' or self.state.mode == 'semi':
+            return 1 - self.compute_pareto_improvement() / self.compute_maximal_pareto_improvement()
+        elif self.state.mode == 'comp':
+            # This is separate to avoid division by zero.
+            return 1
+        else:
+            raise ValueError('unknown game mode')
 
     def _on_after_game(self):
         self.log_key(METRIC_ABORTED, int(self.state.aborted))
@@ -329,4 +379,38 @@ class DealOrNoDeal(DialogueGameMaster):
         # Some extra custom values that represent the final result of the game.
         self.log_key("player_a_proposal", self.state.player_a_proposal)
         self.log_key("player_b_proposal", self.state.player_b_proposal)
+        self.log_key("sum_of_scores", self.compute_sum_of_scores())
+        self.log_key("max_sum_of_scores", self.compute_maximal_sum_of_scores())
+        self.log_key("max_player_scores", self.compute_maximal_player_score())
+        self.log_key("max_pareto_improvement",
+                     self.compute_maximal_pareto_improvement())
+        self.log_key("pareto_improvement", self.compute_pareto_improvement())
+        self.log_key("pareto_optimal", int(self.compute_pareto_optimality()))
         self.log_key("episode_score", self.compute_episode_score())
+
+
+class DealOrNoDealScorer(GameScorer):
+    def __init__(self, game_name: str, experiment: dict, game_instance: dict):
+        super().__init__(game_name, experiment, game_instance)
+
+    def compute_episode_scores(self, interactions: dict):
+        if interactions[METRIC_ABORTED]:
+            self.log_episode_score(BENCH_SCORE, np.nan)
+        else:
+            # Just use the scores that we saved during the run.
+            self.log_episode_score(BENCH_SCORE, interactions['episode_score'])
+            self.log_episode_score(
+                "Sum of Points", interactions['sum_of_scores'] / interactions['max_sum_of_scores'])
+            self.log_episode_score(
+                "Pareto Optimal", interactions['pareto_optimal'])
+
+
+class DealOrNoDealGameBenchmark(GameBenchmark):
+    def __init__(self, game_spec: GameSpec):
+        super().__init__(game_spec)
+
+    def create_game_master(self, experiment: dict, player_models: list[Model]) -> GameMaster:
+        return DealOrNoDeal(self.game_name, self.game_path, experiment, player_models)
+
+    def create_game_scorer(self, experiment: dict, game_instance: dict) -> GameScorer:
+        return DealOrNoDealScorer(self.game_name, experiment, game_instance)
