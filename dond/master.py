@@ -53,15 +53,45 @@ def find_matching_type(count: int, name: str, types: list[str], types_plural: li
 
 
 def compute_score(counts: list[int], values: list[int]) -> int:
-    raise NotImplementedError('todo')
+    return sum(count * value for count, value in zip(counts, values))
 
 
-def maximal_possible_score(counts: list[int], values_a: list[int], values_b: list[int]) -> int:
-    raise NotImplementedError('todo')
+def maximal_sum_of_scores(counts: list[int], values_a: list[int], values_b: list[int]) -> int:
+    # Just give every item to the player that values it most. We don't care about
+    # individual scores so this is optimal.
+    sum = 0
+    for count, vala, valb in zip(counts, values_a, values_b):
+        if vala > valb:
+            sum += count * vala
+        else:
+            sum += count * valb
+    return sum
 
 
 def pareto_improvement(counts: list[int], values_a: list[int], values_b: list[int], counts_a: list[int], counts_b: list[int]) -> int:
-    raise NotImplementedError('todo')
+    # We only have very few items. So for simplicity, we simply iterate through
+    # all possible partitions. Note that not assigning an item is always worse,
+    # given that values are non-negative.
+    def all_item_subsets(counts: list[int]):
+        if len(counts) == 0:
+            yield []
+        else:
+            for i in range(counts[0] + 1):
+                for subset in all_item_subsets(counts[1:]):
+                    yield [i] + subset
+
+    def item_complement(total: list[int], counts: list[int]):
+        return [tot - cnt for tot, cnt in zip(total, counts)]
+
+    current_a = compute_score(counts_a, values_a)
+    current_b = compute_score(counts_b, values_b)
+    best = 0
+    for subset in all_item_subsets(counts):
+        points_a = compute_score(subset, values_a)
+        points_b = compute_score(item_complement(counts, subset), values_b)
+        if points_a >= current_a and points_b >= current_b:
+            best = max(best, max(points_a - current_a, points_b - current_b))
+    return best
 
 
 class DealOrNoSealPlayer(Player):
@@ -305,7 +335,7 @@ class DealOrNoDeal(DialogueGameMaster):
 
     def compute_maximal_sum_of_scores(self) -> int:
         # The maximum possible score does not depend on the players actions.
-        return maximal_possible_score(
+        return maximal_sum_of_scores(
             self.state.item_counts, self.state.player_a_values, self.state.player_b_values
         )
 
