@@ -1,8 +1,9 @@
 
 import re
-from dataclasses import dataclass
+import time
 import logging
 import numpy as np
+from dataclasses import dataclass
 
 from clemcore.backends import Model
 from clemcore.clemgame import GameSpec, GameMaster, GameBenchmark, Player, DialogueGameMaster, GameScorer
@@ -198,22 +199,29 @@ class DealOrNoDeal(DialogueGameMaster):
         match = re.search('\\[(.*?)\\]', response)
         if match:
             # This contains a proposal. Parse the specified syntax.
-            match = re.match(
-                '^Proposal:(()\\s*(\\d+)\\s+(\\w+)\\s*)((,|\\s+)\\s*(\\d+)\\s+(\\w+)\\s*)*,?$',
-                match.groups()[0].strip(), re.IGNORECASE
-            )
-            if match is None:
+            match = match.groups()[0].strip().lower()
+            if not match.startswith('proposal:'):
                 # The proposal submission syntax has not been followed.
                 raise ParseError(
-                    f'proposal must follow the stipulated syntax', response
+                    f'proposal does not start with "Proposal:"', response
                 )
+            match = match[len('proposal:'):].strip()
+            if len(match) > 0 and match[-1] == ',':
+                match = match[:-1]
+            match = match.split(',')
             counts = [0] * len(self.state.item_types)
             seen = [False] * len(self.state.item_types)
             # We allow items to be in any order.
-            for i in range(len(match.groups()) // 4):
-                count = int(match.groups()[4*i + 2])
+            for part in match:
+                parts = part.strip().split()
+                if len(parts) != 2 or not parts[0].isnumeric():
+                    # The proposal submission syntax has not been followed.
+                    raise ParseError(
+                        f'proposal does not include number/name pairs', response
+                    )
+                count = int(parts[0])
                 type = find_matching_type(
-                    count, match.groups()[4*i + 3], self.state.item_types,
+                    count, parts[1], self.state.item_types,
                     self.state.item_types_plural, self.stemmer
                 )
                 if type is None:
@@ -228,7 +236,7 @@ class DealOrNoDeal(DialogueGameMaster):
                         f'proposal must include every item type only once', response
                     )
                 seen[index] = True
-                counts[index] = count
+                counts[index] += count
             self.log_to_self('valid response', 'proposal')
             return counts
         else:
@@ -242,6 +250,8 @@ class DealOrNoDeal(DialogueGameMaster):
         self.state.aborted = True
 
     def _advance_game(self, player: Player, parsed_response: str | list[int]):
+        # Just sleep to avoid hitting rate limits.
+        time.sleep(10)
         # If this is a string, the message was not a proposal.
         if isinstance(parsed_response, str):
             if self.current_round == self.state.max_rounds \
@@ -254,16 +264,16 @@ class DealOrNoDeal(DialogueGameMaster):
                 )
             self.log_to_self('valid message', parsed_response)
             if player == self.player_a:
-                self.set_context_for(self.player_b, parsed_response)
+                if len(parsed_response.strip()) != 0:
+                    self.set_context_for(self.player_b, parsed_response)
             else:
                 assert player == self.player_b
                 # If this was the last allowed turn, we prompt the next player to
                 # make their secret proposal.
-                self.set_context_for(
-                    self.player_a, parsed_response + '\n\n\n' +
-                    self.state.proposal_prompt_timeout
+                new_context = (parsed_response + '\n\n\n' + self.state.proposal_prompt_timeout) \
                     if self.current_round == self.state.max_rounds - 1 else parsed_response
-                )
+                if len(new_context.strip()) != 0:
+                    self.set_context_for(self.player_a, new_context)
         else:
             if any(
                 proposed > count for count, proposed in zip(self.state.item_counts, parsed_response)
