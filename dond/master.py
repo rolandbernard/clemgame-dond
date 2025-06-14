@@ -94,7 +94,7 @@ def pareto_improvement(counts: list[int], values_a: list[int], values_b: list[in
     return best
 
 
-class DealOrNoSealPlayer(Player):
+class DealOrNoDealPlayer(Player):
     def __init__(self, model: Model):
         super().__init__(model)
         # Just some dummy sample responses.
@@ -161,8 +161,8 @@ class DealOrNoDeal(DialogueGameMaster):
                 game_instance['player_b_values'], game_instance['item_types']
             ))
         # Add players.
-        self.player_a = DealOrNoSealPlayer(self.player_models[0])
-        self.player_b = DealOrNoSealPlayer(self.player_models[1])
+        self.player_a = DealOrNoDealPlayer(self.player_models[0])
+        self.player_b = DealOrNoDealPlayer(self.player_models[1])
         self.add_player(self.player_a, initial_context=player_a_initial_prompt)
         self.add_player(self.player_b, initial_prompt=player_b_initial_prompt)
         # Named arguments to avoid any order sensitivity.
@@ -198,7 +198,7 @@ class DealOrNoDeal(DialogueGameMaster):
         match = re.search('\\[(.*?)\\]', response)
         if match:
             # This contains a proposal. Parse the specified syntax.
-            match = re.search(
+            match = re.match(
                 '^Proposal:(()\\s*(\\d+)\\s+(\\w+)\\s*)((,|\\s+)\\s*(\\d+)\\s+(\\w+)\\s*)*,?$',
                 match.groups()[0].strip(), re.IGNORECASE
             )
@@ -210,10 +210,10 @@ class DealOrNoDeal(DialogueGameMaster):
             counts = [0] * len(self.state.item_types)
             seen = [False] * len(self.state.item_types)
             # We allow items to be in any order.
-            for _ in range(len(match.groups()) // 4):
-                count = int(match.groups()[2])
+            for i in range(len(match.groups()) // 4):
+                count = int(match.groups()[4*i + 2])
                 type = find_matching_type(
-                    count, match.groups()[3], self.state.item_types,
+                    count, match.groups()[4*i + 3], self.state.item_types,
                     self.state.item_types_plural, self.stemmer
                 )
                 if type is None:
@@ -238,7 +238,7 @@ class DealOrNoDeal(DialogueGameMaster):
             return response
 
     def _on_parse_error(self, error: ParseError):
-        self.log_to_self('invalid format', 'abort game')
+        self.log_to_self('invalid format', error.reason)
         self.state.aborted = True
 
     def _advance_game(self, player: Player, parsed_response: str | list[int]):
@@ -260,7 +260,7 @@ class DealOrNoDeal(DialogueGameMaster):
                 # If this was the last allowed turn, we prompt the next player to
                 # make their secret proposal.
                 self.set_context_for(
-                    self.player_a, parsed_response + '\n\n' +
+                    self.player_a, parsed_response + '\n\n\n' +
                     self.state.proposal_prompt_timeout
                     if self.current_round == self.state.max_rounds - 1 else parsed_response
                 )

@@ -11,16 +11,16 @@ games=("dond")
 
 # Run with all of the models we defined in `model_registry.json`.
 models=(
+    "mistral-small-2503"
+    "magistral-small-2506"
+    "mistral-large-2411"
+    "magistral-medium-2506"
     "gemma-3-27b-it"
     "gemini-2.5-flash-preview-05-20"
     "gemini-2.0-flash-001"
     "o4-mini-2025-04-16"
     "gpt-3.5-turbo-0125"
     "gpt-4.1-2025-04-16"
-    "mistral-large-2411"
-    "mistral-small-2503"
-    "magistral-medium-2506"
-    "magistral-small-2506"
     "qwen-qwq-32b"
     "qwen3-32b"
     "llama-3-70b"
