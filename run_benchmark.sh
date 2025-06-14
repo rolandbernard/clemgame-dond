@@ -41,23 +41,22 @@ echo "RUNNING: Benchmark Run"
 echo "==================================================="
 echo
 
-for mode in "${modes[@]}"; do
-    for lang in "${languages[@]}"; do
-        for game in "${games[@]}"; do
+for game in "${games[@]}"; do
+    for mode in "${modes[@]}"; do
+        for lang in "${languages[@]}"; do
             for model in "${models[@]}"; do
                 echo "Testing ${model} on ${game} (${mode}, ${lang})"
-                { time clem run -g "${game}" -m "${model}" -i "instances_${mode}_${lang}" -r "results_${mode}_${lang}"; } 2>&1 \
-                    | tee logs/runtime."${game}"."${model}".log
-                { time clem transcribe -g "${game}" -r "results_${mode}_${lang}"; } 2>&1 \
-                    | tee logs/runtime.transcribe."${game}".log
-                { time clem score -g "${game}" -r "results_${mode}_${lang}"; } 2>&1 \
-                    | tee logs/runtime.score."${game}".log
+                { time clem run -g "${game}" -m "${model}" -i "instances_${mode}_${lang}"; } 2>&1 \
+                    | tee logs/runtime."${game}"."${mode}"."${lang}"."${model}".log
             done
         done
-        echo "Evaluating results for ${mode} in ${lang}"
-        { time clem eval -r "results_${mode}_${lang}"; }
     done
+    echo "Evaluating results for ${game}."
+    { time clem transcribe -g "${game}"; } 2>&1 | tee logs/runtime.transcribe."${game}".log
+    { time clem score -g "${game}"; } 2>&1 | tee logs/runtime.score."${game}".log
 done
+echo "Evaluating all results."
+{ time clem eval; } 2>&1 | tee logs/runtime.score."${game}".log
 
 echo "==================================================="
 echo "FINISHED: Benchmark Run"
