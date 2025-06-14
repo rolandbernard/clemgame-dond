@@ -11,18 +11,18 @@ games=("dond")
 
 # Run with all of the models we defined in `model_registry.json`.
 models=(
-    "mistral-small-2503"
-    "magistral-small-2506"
-    "mistral-large-2411"
-    "magistral-medium-2506"
     "gemma-3-27b-it"
-    "gemini-2.5-flash-preview-05-20"
-    "gemini-2.0-flash-001"
-    "o4-mini-2025-04-16"
-    "gpt-3.5-turbo-0125"
-    "gpt-4.1-2025-04-16"
+    "mistral-small-2503"
     "llama-3-70b"
+    "gpt-3.5-turbo-0125"
+    "magistral-small-2506"
+    "gemini-2.0-flash-001"
     "llama-4-maverick-17b-128e"
+    "mistral-large-2411"
+    "o4-mini-2025-04-16"
+    "magistral-medium-2506"
+    "gpt-4.1-2025-04-16"
+    "gemini-2.5-flash-preview-05-20"
 )
 # Removed because I did not get them to work. They output raw thinking data which
 # I didn't really know hot to handle because it was being cut off.
