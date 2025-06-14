@@ -250,6 +250,13 @@ class DealOrNoDeal(DialogueGameMaster):
         self.state.aborted = True
 
     def _advance_game(self, player: Player, parsed_response: str | list[int]):
+        # Sleep to prevent rate limit hits. This is just below the free tier limits
+        # of googles ai. For the others, it seems to handle 429s more gracefully.
+        time.sleep({
+            'gemma-3-27b-it': 2,
+            'gemini-2.0-flash-001': 4,
+            'gemini-2.5-flash-preview-05-20': 6,
+        }.get(player.model.get_name(), 1))
         # If this is a string, the message was not a proposal.
         if isinstance(parsed_response, str):
             if self.current_round == self.state.max_rounds \
@@ -266,7 +273,7 @@ class DealOrNoDeal(DialogueGameMaster):
                     self.set_context_for(self.player_b, parsed_response)
                 else:
                     self.set_context_for(
-                        self.player_b, "<no response from the other player>")
+                        self.player_b, '<no response from the other player>')
             else:
                 assert player == self.player_b
                 # If this was the last allowed turn, we prompt the next player to
@@ -277,7 +284,7 @@ class DealOrNoDeal(DialogueGameMaster):
                     self.set_context_for(self.player_a, new_context)
                 else:
                     self.set_context_for(
-                        self.player_b, "<no response from the other player>")
+                        self.player_b, '<no response from the other player>')
         else:
             if any(
                 proposed > count for count, proposed in zip(self.state.item_counts, parsed_response)
@@ -421,16 +428,16 @@ class DealOrNoDeal(DialogueGameMaster):
         self.log_key(METRIC_LOSE, int(self.state.failure))
         self.log_key(METRIC_SUCCESS, int(self.state.success))
         # Some extra custom values that represent the final result of the game.
-        self.log_key("player_a_proposal", self.state.player_a_proposal)
-        self.log_key("player_b_proposal", self.state.player_b_proposal)
-        self.log_key("sum_of_scores", self.compute_sum_of_scores())
-        self.log_key("max_sum_of_scores", self.compute_maximal_sum_of_scores())
-        self.log_key("max_player_scores", self.compute_maximal_player_score())
-        self.log_key("max_pareto_improvement",
+        self.log_key('player_a_proposal', self.state.player_a_proposal)
+        self.log_key('player_b_proposal', self.state.player_b_proposal)
+        self.log_key('sum_of_scores', self.compute_sum_of_scores())
+        self.log_key('max_sum_of_scores', self.compute_maximal_sum_of_scores())
+        self.log_key('max_player_scores', self.compute_maximal_player_score())
+        self.log_key('max_pareto_improvement',
                      self.compute_maximal_pareto_improvement())
-        self.log_key("pareto_improvement", self.compute_pareto_improvement())
-        self.log_key("pareto_optimal", int(self.compute_pareto_optimality()))
-        self.log_key("episode_score", self.compute_episode_score())
+        self.log_key('pareto_improvement', self.compute_pareto_improvement())
+        self.log_key('pareto_optimal', int(self.compute_pareto_optimality()))
+        self.log_key('episode_score', self.compute_episode_score())
 
 
 class DealOrNoDealScorer(GameScorer):
@@ -444,9 +451,9 @@ class DealOrNoDealScorer(GameScorer):
             # Just use the scores that we saved during the run.
             self.log_episode_score(BENCH_SCORE, interactions['episode_score'])
             self.log_episode_score(
-                "Sum of Points", interactions['sum_of_scores'] / interactions['max_sum_of_scores'])
+                'Sum of Points', interactions['sum_of_scores'] / interactions['max_sum_of_scores'])
             self.log_episode_score(
-                "Pareto Optimal", interactions['pareto_optimal'])
+                'Pareto Optimal', interactions['pareto_optimal'])
 
 
 class DealOrNoDealGameBenchmark(GameBenchmark):
