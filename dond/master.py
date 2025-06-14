@@ -250,8 +250,6 @@ class DealOrNoDeal(DialogueGameMaster):
         self.state.aborted = True
 
     def _advance_game(self, player: Player, parsed_response: str | list[int]):
-        # Just sleep to avoid hitting rate limits.
-        time.sleep(10)
         # If this is a string, the message was not a proposal.
         if isinstance(parsed_response, str):
             if self.current_round == self.state.max_rounds \
@@ -266,6 +264,9 @@ class DealOrNoDeal(DialogueGameMaster):
             if player == self.player_a:
                 if len(parsed_response.strip()) != 0:
                     self.set_context_for(self.player_b, parsed_response)
+                else:
+                    self.set_context_for(
+                        self.player_b, "<no response from the other player>")
             else:
                 assert player == self.player_b
                 # If this was the last allowed turn, we prompt the next player to
@@ -274,6 +275,9 @@ class DealOrNoDeal(DialogueGameMaster):
                     if self.current_round == self.state.max_rounds - 1 else parsed_response
                 if len(new_context.strip()) != 0:
                     self.set_context_for(self.player_a, new_context)
+                else:
+                    self.set_context_for(
+                        self.player_b, "<no response from the other player>")
         else:
             if any(
                 proposed > count for count, proposed in zip(self.state.item_counts, parsed_response)

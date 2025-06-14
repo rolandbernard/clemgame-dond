@@ -21,11 +21,13 @@ models=(
     "o4-mini-2025-04-16"
     "gpt-3.5-turbo-0125"
     "gpt-4.1-2025-04-16"
-    "qwen-qwq-32b"
-    "qwen3-32b"
     "llama-3-70b"
     "llama-4-maverick-17b-128e"
 )
+# Removed because I did not get them to work. They output raw thinking data which
+# I didn't really know hot to handle because it was being cut off.
+# "qwen3-32b"
+# "qwen-qwq-32b"
 
 languages=("en" "de" "it")
 
