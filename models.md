@@ -1,7 +1,8 @@
 * Azure
-    * GPT o4-mini
-    * GPT 4.1
-    * GPT 3.5 turbo
+    * o4-mini 2025-04-16
+    * GPT 4.1 2025-04-14
+    * GPT 4 turbo 2024-04-09
+    * GPT 3.5 turbo 0125
 * groq
     * Llama 3 70B
     * Llama 4 Maverick

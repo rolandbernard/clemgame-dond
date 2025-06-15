@@ -23,9 +23,11 @@ models=(
     "magistral-medium-2506"
     "gpt-4.1-2025-04-16"
     "gemini-2.5-flash-preview-05-20"
+    "gpt-4-turbo-2024-04-09"
 )
-# Removed because I did not get them to work. They output raw thinking data which
-# I didn't really know hot to handle because it was being cut off.
+# Removed the below two because I did not get them to work. They output raw
+# thinking data which I didn't really know how to handle because it was being cut
+# off.
 # "qwen3-32b"
 # "qwen-qwq-32b"
 
