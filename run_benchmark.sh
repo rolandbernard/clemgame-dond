@@ -20,7 +20,6 @@ models=(
     "mistral-large-2411"
     "o4-mini-2025-04-16"
     "gpt-4.1-2025-04-16"
-    "gemini-2.5-flash-preview-05-20"
     "gpt-4-turbo-2024-04-09"
 )
 # Removed the below four because I did not get them to work. They output raw
@@ -30,6 +29,8 @@ models=(
 # "qwen-qwq-32b"
 # "magistral-small-2506"
 # "magistral-medium-2506"
+# The one below somehow always returns empty strings.
+# "gemini-2.5-flash-preview-05-20"
 
 languages=("en" "de" "it")
 
