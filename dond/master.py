@@ -207,36 +207,37 @@ class DealOrNoDeal(DialogueGameMaster):
                 )
             match = match[len('proposal:'):].strip()
             if len(match) > 0 and match[-1] == ',':
-                match = match[:-1]
-            match = match.split(',')
+                match = match[:-1].strip()
             counts = [0] * len(self.state.item_types)
             seen = [False] * len(self.state.item_types)
-            # We allow items to be in any order.
-            for part in match:
-                parts = part.strip().split()
-                if len(parts) != 2 or not parts[0].isnumeric():
-                    # The proposal submission syntax has not been followed.
-                    raise ParseError(
-                        f'proposal does not include number/name pairs', response
+            if len(match) > 0:
+                match = match.split(',')
+                # We allow items to be in any order.
+                for part in match:
+                    parts = part.strip().split()
+                    if len(parts) != 2 or not parts[0].isnumeric():
+                        # The proposal submission syntax has not been followed.
+                        raise ParseError(
+                            f'proposal does not include number/name pairs', response
+                        )
+                    count = int(parts[0])
+                    type = find_matching_type(
+                        count, parts[1], self.state.item_types,
+                        self.state.item_types_plural, self.stemmer
                     )
-                count = int(parts[0])
-                type = find_matching_type(
-                    count, parts[1], self.state.item_types,
-                    self.state.item_types_plural, self.stemmer
-                )
-                if type is None:
-                    # The proposal includes an item type that was not in the game.
-                    raise ParseError(
-                        f'proposal must include only valid item types', response
-                    )
-                index = self.state.item_types.index(type)
-                if seen[index]:
-                    # The proposal includes the same item type multiple times.
-                    raise ParseError(
-                        f'proposal must include every item type only once', response
-                    )
-                seen[index] = True
-                counts[index] += count
+                    if type is None:
+                        # The proposal includes an item type that was not in the game.
+                        raise ParseError(
+                            f'proposal must include only valid item types', response
+                        )
+                    index = self.state.item_types.index(type)
+                    if seen[index]:
+                        # The proposal includes the same item type multiple times.
+                        raise ParseError(
+                            f'proposal must include every item type only once', response
+                        )
+                    seen[index] = True
+                    counts[index] += count
             self.log_to_self('valid response', 'proposal')
             return counts
         else:

@@ -23,7 +23,7 @@ models=(
     "gemini-2.5-flash-preview-05-20"
     "gpt-4-turbo-2024-04-09"
 )
-# Removed the below two because I did not get them to work. They output raw
+# Removed the below four because I did not get them to work. They output raw
 # thinking data which I didn't really know how to handle because it was being cut
 # off.
 # "qwen3-32b"
@@ -37,19 +37,19 @@ languages=("en" "de" "it")
 # if both models are the same. We could evaluate models by fixing the opponent.
 modes=("coop" "semi")
 
-echo
 echo "==================================================="
 echo "RUNNING: Benchmark Run"
 echo "==================================================="
-echo
 
 for game in "${games[@]}"; do
     for mode in "${modes[@]}"; do
         for lang in "${languages[@]}"; do
             for model in "${models[@]}"; do
-                echo "Testing ${model} on ${game} (${mode}, ${lang})"
-                { time clem run -g "${game}" -m "${model}" -i "instances_${mode}_${lang}"; } 2>&1 \
-                    | tee logs/runtime."${game}"."${mode}"."${lang}"."${model}".log
+                if [ ! -e "results/${model}-t0.0--${model}-t0.0/${game}/0_${mode}_${lang}" ]; then
+                    echo "Testing ${model} on ${game} (${mode}, ${lang})"
+                    { time clem run -g "${game}" -m "${model}" -i "instances_${mode}_${lang}"; } 2>&1 \
+                        | tee logs/runtime."${game}"."${mode}"."${lang}"."${model}".log
+                fi
             done
         done
     done
