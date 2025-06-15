@@ -113,6 +113,7 @@ class DealOrNoDealPlayer(Player):
 @dataclass
 class GameState:
     mode: str
+    language: str
     max_rounds: int
     player_a_initial_prompt: str
     player_b_initial_prompt: str
@@ -169,6 +170,7 @@ class DealOrNoDeal(DialogueGameMaster):
         # Named arguments to avoid any order sensitivity.
         self.state = GameState(
             mode=self.experiment['mode'],
+            language=self.experiment['language'],
             max_rounds=self.experiment['max_turns'],
             player_a_initial_prompt=player_b_initial_prompt,
             player_b_initial_prompt=player_b_initial_prompt,
@@ -200,12 +202,17 @@ class DealOrNoDeal(DialogueGameMaster):
         if match:
             # This contains a proposal. Parse the specified syntax.
             match = match.groups()[0].strip().lower()
-            if not match.startswith('proposal:'):
+            prefix = {
+                'en': 'proposal:',
+                'de': 'vorschlag:',
+                'it': 'proposta:',
+            }[self.state.language]
+            if not match.startswith(prefix):
                 # The proposal submission syntax has not been followed.
                 raise ParseError(
-                    f'proposal does not start with "Proposal:"', response
+                    f'proposal does not start with "{prefix}"', response
                 )
-            match = match[len('proposal:'):].strip()
+            match = match[len(prefix):].strip()
             if len(match) > 0 and match[-1] == ',':
                 match = match[:-1].strip()
             counts = [0] * len(self.state.item_types)
