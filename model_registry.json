@@ -28,7 +28,9 @@
             "name": "OpenAI",
             "url": "https://openai.com/policies/row-terms-of-use/"
         },
-        "model_config": {}
+        "model_config": {
+            "reasoning_model": true
+        }
     },
     {
         "model_name": "gpt-3.5-turbo-0125",
