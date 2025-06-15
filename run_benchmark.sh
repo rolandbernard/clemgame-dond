@@ -46,6 +46,7 @@ for game in "${games[@]}"; do
         for lang in "${languages[@]}"; do
             for model in "${models[@]}"; do
                 if [ ! -e "results/${model}-t0.0--${model}-t0.0/${game}/0_${mode}_${lang}" ]; then
+                    mkdir -p "results/${model}-t0.0--${model}-t0.0/${game}/0_${mode}_${lang}"
                     echo "Testing ${model} on ${game} (${mode}, ${lang})"
                     { time clem run -g "${game}" -m "${model}" -i "instances_${mode}_${lang}"; } 2>&1 \
                         | tee logs/runtime."${game}"."${mode}"."${lang}"."${model}".log
