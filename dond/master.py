@@ -457,7 +457,8 @@ class DealOrNoDealScorer(GameScorer):
             self.log_episode_score(BENCH_SCORE, np.nan)
         else:
             # Just use the scores that we saved during the run.
-            self.log_episode_score(BENCH_SCORE, interactions['episode_score'])
+            self.log_episode_score(
+                BENCH_SCORE, 100 * interactions['episode_score'])
             self.log_episode_score(
                 'Sum of Points', interactions['sum_of_scores'] / interactions['max_sum_of_scores'])
             self.log_episode_score(
