@@ -91,5 +91,5 @@ The `results/raw.csv` file provides a table of the game outcomes and key metrics
 * **`Lose`**: A boolean (0/1) flag indicating if no valid agreement was reached.
 * **`Success`**: A boolean (0/1) flag indicating if a valid agreement was successfully reached.
 * **`Pareto Optimal`**: A boolean (0/1) flag indicating whether the final agreement reached by the LLMs is Pareto optimal, i.e., no player's score can be improved without decreasing another player's score.
-* **`Main Score`**: A crucial metric computed as $1 - \frac{\text{Maximum Pareto Improvement}}{\text{Maximum Score per Player}}$. This score reflects how close the achieved agreement is to the optimal outcome, with higher scores indicating better performance relative to the maximum possible improvement.
+* **`Main Score`**: A crucial metric computed as $100 - 100 \cdot \frac{\text{Maximum Pareto Improvement}}{\text{Maximum Score per Player}}$. This score reflects how close the achieved agreement is to the optimal outcome, with higher scores indicating better performance relative to the maximum possible improvement.
 
