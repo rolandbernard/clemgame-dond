@@ -60,7 +60,7 @@ for game in "${games[@]}"; do
     { time clem score -g "${game}"; } 2>&1 | tee logs/runtime.score."${game}".log
 done
 echo "Evaluating all results."
-{ time clem eval; } 2>&1 | tee logs/runtime.score."${game}".log
+{ time clem eval; } 2>&1 | tee logs/runtime.score.log
 
 echo "==================================================="
 echo "FINISHED: Benchmark Run"
